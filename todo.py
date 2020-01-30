@@ -55,10 +55,28 @@ class todoitem():
         name=name.ljust(22,' ')
         return out.format(status,name,self.created,self.due)
 
+def sortlist(todolist,sortedby='status'):
+    def keyfunc(item):
+        return item.due
+    if sortedby == 'status':
+        def keyfunc(item):
+            if item.status=='todo':
+                return 1
+            if item.status=='working':
+                return 2
+            if item.status=='done':
+                return 3
+            return 4
+    return sorted(todolist,key=keyfunc)
+
 def show(todolist,index):
     print('    |name                  |created   |due')
-    i=0
+    i=index-10
+    if i < 0:
+        i = 0
+    todolist=todolist[i:i+20]
     for todo in todolist:
+
         if index==i:
             sys.stdout.write('>')
         else:
@@ -74,8 +92,13 @@ def save(todolist,todofile):
     todofile.save()
 
 if __name__ == '__main__':
-    todofile=ini.inifile('to.do')
-    todofile.load()
+    try:
+        todofile=ini.inifile('to.do')
+        todofile.load()
+    except:
+        open('to.do','w+').close()
+        todofile=ini.inifile('to.do')
+        todofile.load()
     todolist=[]
     for section in todofile.sections:
         if section == '':
@@ -84,7 +107,14 @@ if __name__ == '__main__':
         item.load(todofile.sections[section])
         todolist.append(item)
     index=0
+    message=''
+    sortedby='status'
     while True:
+        sys.stdout.write('\x1bc')
+        todolist = sortlist(todolist,sortedby)
+        if len(message)>0:
+            print(message)
+            message=''
         show(todolist,index)
         key = getch()
         if key == 'n':
@@ -94,7 +124,7 @@ if __name__ == '__main__':
             todolist.append(n)
         elif key == 'w':
            save(todolist,todofile) 
-           print('saved')
+           message = 'saved'
         elif key == 'd':
             due = input('due:')
             todolist[index].due=due
