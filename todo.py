@@ -67,6 +67,18 @@ def sortlist(todolist,sortedby='status'):
             if item.status=='done':
                 return 3
             return 4
+    if sortedby == 'name':
+        def keyfunc(item):
+            return item.name
+    if sortedby == 'due':
+        def keyfunc(item):
+            try:
+                y,m,d = item.due.split('.')
+            except:
+                return 0
+            date = datetime.date(y,m,d)
+            return date.toordinal()
+            
     return sorted(todolist,key=keyfunc)
 
 def show(todolist,index):
@@ -117,6 +129,16 @@ if __name__ == '__main__':
             message=''
         show(todolist,index)
         key = getch()
+        if key == 's':
+            s = input('sort by [s]tatus,[n]ame,[d]ue,[c]reation: ')
+            if s == 's':
+                sortedby = 'status'
+            if s == 'n':
+                sortedby = 'name'
+            if s == 'd':
+                sortedby = 'due'
+            if s == 'c':
+                sortedby = 'creation'
         if key == 'n':
             n = todoitem()
             n.new()
